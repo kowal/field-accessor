@@ -49,6 +49,20 @@ module FieldAccessor
             send("#{field}_proc=", SimpleProxy.create(self, target, &block))
           end
         end
+
+        # o.value_reader { }
+        define_method("#{f}_reader") do |reader_proc|      
+          prox = send("#{f}_proc") || SimpleProxy.new(self) # get or create proxy
+          prox.reader = reader_proc
+          send("#{f}_proc=", prox)
+        end
+
+        # o.value_writer { }
+        define_method("#{f}_writer") do |writer_proc|      
+          prox = send("#{f}_proc") || SimpleProxy.new(self) # get or create proxy
+          prox.writer = writer_proc
+          send("#{f}_proc=", prox)
+        end
       end
 
       # def value() ... end

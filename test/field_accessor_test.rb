@@ -29,6 +29,8 @@ class FieldAccessorTest < Test::Unit::TestCase
 
   def test_init_by_lambda
     may_change = "one"
+
+    # SYNTAX 1
     @user.name = lambda { may_change }
 
     assert_equal("one", @user.name)
@@ -37,9 +39,10 @@ class FieldAccessorTest < Test::Unit::TestCase
     assert_equal("two", @user.name)    
   end
 
-  def test_init_by_bind
+  def test_init_by_block
     @other = ["other", "model"]
 
+    # SYNTAX 2
     @user.bind(:name => @other) do
       read { target.last }
       write { |v| target.push(v) }
@@ -53,6 +56,23 @@ class FieldAccessorTest < Test::Unit::TestCase
     @user.name = "even latest"
     assert_equal("even latest", @user.name)
     assert_equal("even latest", @other.last)    
+  end
+
+  def test_init_by_binding
+    @other = ["other", "model"]
+
+    # SYNTAX 3
+    @user.name_reader proc { @other.last }
+    @user.name_writer proc { |v| @other.push(v) }
+
+    assert_equal(@other.last, @user.name)
+
+    @other.push("latest")
+    assert_equal("latest", @user.name)
+
+    @user.name = "even latest"
+    assert_equal("even latest", @user.name)
+    assert_equal("even latest", @other.last)
   end
 
   def test_put_errors
